@@ -1,5 +1,5 @@
 //  For checking offline 
-const indexDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+const indexDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexDB; 
 
 //letting db be declared to 
 let db;
@@ -7,9 +7,9 @@ let db;
 const req = indexedDB.open("budget", 1);
 
 
-req.offLineData = function ({data}) {
+req.offLineData = function ({event}) {
     // Defining database for offline 
-    let db = data.result
+    let db = event.target.result;
     db.createObjectStore ("pending", {autoIncrement: true}) 
 }
 
@@ -40,19 +40,13 @@ function checkDb() {
    
     //Returning  info
     const store = saveInfo.objectStore("pending");
-    let allInfo = store.getAll();
+    const allInfo = store.getAll();
         allInfo.onSuccess = function() {
         const recordCount = allInfo.result.length;
         console.log(allInfo.result);
-        if (recordCount === 0){
-            return;
-        }
-
-        //Putting information into JSON
+        if (recordCount > 0){
         const JSONInfo = JSON.stringify(allInfo.result);
-
-        // fetching the data aka post method
-        fetch("/api/transaction/bulk", {
+            fetch("/api/transaction/bulk", {
             method: "POST", 
             body: JSONInfo,
             headers: {
@@ -60,13 +54,15 @@ function checkDb() {
                 "Content-Type": "application/json"
             }
         })
-        // Storing infor for the transactiong and reading the file 
+        
+        // Storing info for the transaction and reading the file 
         .then(response => response.json())
         .then(() => {
-            const saveInfo = db.transaction(["pending"], "readwrite");
+            const saveInfo = db.transaction("pending", "readwrite");
             const store = saveInfo.objectStore("pending");
             store.clear();
         })        
+    }
     };
 }
 
