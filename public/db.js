@@ -7,9 +7,9 @@ let db;
 const req = indexedDB.open("budget", 1);
 
 
-req.offLineData = function ({event}) {
+req.offLineData = function ({data}) {
     // Defining database for offline 
-    let db = event.target.result;
+    let db = data.target.result;
     db.createObjectStore ("pending", {autoIncrement: true}) 
 }
 
@@ -30,7 +30,7 @@ req.onError = function(event) {
 
 //Saving the information 
 function saveRecord(record) {
-    const saveInfo = db.transaction("pending", "readwrite");
+    const saveInfo = db.transaction(["pending"], "readwrite");
     const store = saveInfo.objectStore("pending");
     store.add(record);
 }
@@ -44,7 +44,7 @@ function checkDb() {
         allInfo.onSuccess = function() {
         const recordCount = allInfo.result.length;
         console.log(allInfo.result);
-        if (recordCount > 0){
+        if (recordCount === 0){
         const JSONInfo = JSON.stringify(allInfo.result);
             fetch("/api/transaction/bulk", {
             method: "POST", 
@@ -58,8 +58,8 @@ function checkDb() {
         // Storing info for the transaction and reading the file 
         .then(response => response.json())
         .then(() => {
-            const saveInfo = db.transaction("pending", "readwrite");
-            const store = saveInfo.objectStore("pending");
+            let saveInfo = db.transaction("pending", "readwrite");
+            let store = saveInfo.objectStore("pending");
             store.clear();
         })        
     }

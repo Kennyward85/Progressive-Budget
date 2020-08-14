@@ -4,7 +4,7 @@ const FILES_TO_CACHE = [
   
   ];
   
-  const CACHE_NAME = "static-cache-v1";
+  const CACHE_NAME = "static-cache-v2";
   const DATA_CACHE = "cache-v1";
   
   self.addEventListener("install", evt => {
@@ -24,29 +24,27 @@ const FILES_TO_CACHE = [
     console.log('activation in progress')
     // remove old caches
     evt.waitUntil(
-      caches.keys().then(key => {
+      caches.keys().then(thisKey => {
         return Promise.all(
-          key.filter(key =>{
-            return !key.startsWith(CACHE_NAME, DATA_CACHE)
-          }).map(key => {
-            return caches.delete(key);
-         
-            
-            },
+          thisKey.map(keyList =>{
+            if( keyList !== CACHE_NAME && keyList !== DATA_CACHE) {
+              console.log("Removing Cached Information", KeyList);
+              return caches.delete(keyList)
+              
+            }
+          }),
           console.log("activation complete")
         )
-      )
-        }
-      ),
+      
+        })
+        )
     self.clients.claim()
-  )}
-  );
+  });
 
 
   self.addEventListener("fetch", evt => {
-    console.log("fetching");
-
     if (evt.request.url.includes("/api/")) {
+      console.log("Data fetched")
       evt.respondWith(
         caches
         .open(DATA_CACHE)
