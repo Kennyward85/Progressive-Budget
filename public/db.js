@@ -1,19 +1,21 @@
+
+
 //letting db be declared to 
 let db;
 
-const request = indexedDB.open("budget", 1);
+const req = indexedDB.open("budget", 1);
 
 
-request.onupgradeneeded = function (event) {
+req.offLineData = function (event) {
     // Defining database for offline 
-    const db = event.target.result;
-    db.createObjectStore("pending", {autoIncrement: true}) 
+    let db = event.target.result;
+    db.createObjectStore ("pending", {autoIncrement: true}) 
 }
 
-request.onsuccess = function (event){
+req.onSuccess = function (event){
     db = event.target.result;
    
-    if(navigator.onLine) {
+    if(navigator.online) {
         console.log("Connection established you are online");
         checkDb();
     } else {
@@ -21,27 +23,27 @@ request.onsuccess = function (event){
     }
 };
 // Error message
-request.onerror = function(event) {
+req.onError = function(event) {
     console.log("Unsuccessful Request" + event.target.errorCode);
 };
 
 //Saving the information 
 function saveRecord(record) {
-    const transaction = db.transaction(["pending"], "readwrite");
-    const store = transaction.objectStore("pending");
+    const saveInfo = db.transaction(["pending"], "readwrite");
+    const store = saveInfo.objectStore("pending");
     store.add(record);
 }
 
 function checkDb() {
-    const transaction = db.transaction(["pending"], "readwrite");
+    const saveInfo = db.transaction(["pending"], "readwrite");
    
     //Returning  info
-    const store = transaction.objectStore("pending");
+    const store = saveInfo.objectStore("pending");
     const allInfo = store.getAll();
-        allInfo.onsuccess = function() {
+        allInfo.onSuccess = function() {
         const recordCount = allInfo.result.length;
         console.log(allInfo.result);
-        if (recordCount === 0){
+        if (recordCount > 0){
         const JSONInfo = JSON.stringify(allInfo.result);
             fetch("/api/transaction/bulk", {
             method: "POST", 
@@ -55,8 +57,8 @@ function checkDb() {
         // Storing info for the transaction and reading the file 
         .then(response => response.json())
         .then(() => {
-            const saveInfo = db.transaction(["pending"], "readwrite");
-            const store = saveInfo.objectStore("pending");
+            let saveInfo = db.transaction(["pending"], "readwrite");
+             store = saveInfo.objectStore("pending");
             store.clear();
         })        
     }
