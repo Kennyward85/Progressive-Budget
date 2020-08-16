@@ -1,21 +1,23 @@
-
-
 //letting db be declared to 
 let db;
 
-const req = indexedDB.open("budget", 1);
 
 
-req.offLineData = function (event) {
+let req = window.indexedDB.open("budget", 2);
+console.log("TestDB")
+
+req.onupgradeneeded = function (event) {
+    console.log("Checking for offline data")
     // Defining database for offline 
-    let db = event.target.result;
+     db = event.target.result;
     db.createObjectStore ("pending", {autoIncrement: true}) 
 }
 
-req.onSuccess = function (event){
+req.onsuccess = function (event){
+    console.log("Testing Success")
     db = event.target.result;
    
-    if(navigator.online) {
+    if(navigator.onLine) {
         console.log("Connection established you are online");
         checkDb();
     } else {
@@ -23,19 +25,19 @@ req.onSuccess = function (event){
     }
 };
 // Error message
-req.onError = function(event) {
+req.onerror = function(event) {
     console.log("Unsuccessful Request" + event.target.errorCode);
 };
 
 //Saving the information 
 function saveRecord(record) {
-    const saveInfo = db.transaction(["pending"], "readwrite");
+    const saveInfo = db.transaction("pending", "readwrite");
     const store = saveInfo.objectStore("pending");
     store.add(record);
 }
 
 function checkDb() {
-    const saveInfo = db.transaction(["pending"], "readwrite");
+    const saveInfo = db.transaction("pending", "readwrite");
    
     //Returning  info
     const store = saveInfo.objectStore("pending");
@@ -57,7 +59,7 @@ function checkDb() {
         // Storing info for the transaction and reading the file 
         .then(response => response.json())
         .then(() => {
-            let saveInfo = db.transaction(["pending"], "readwrite");
+            let saveInfo = db.transaction("pending", "readwrite");
              store = saveInfo.objectStore("pending");
             store.clear();
         })        

@@ -4,28 +4,29 @@ const FILES_TO_CACHE = [
   
   ];
   
-  const CACHE_NAME = "static-cache-v1";
+  const STATIC_CACHE = "static-cache-v2";
   const DATA_CACHE = "data-cache-v1";
 
-  self.addEventListener("install", evt => {
-    console.log('Install event in process')
-    evt.waitUntil(
-      caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(FILES_TO_CACHE)
-       )    
-    );
+// install
+self.addEventListener("install", function(evt) {
+  evt.waitUntil(
+    caches.open(STATIC_CACHE).then(cache => {
+      console.log("Files Cached");
+      return cache.addAll(FILES_TO_CACHE);
+    })
+  );
 
   self.skipWaiting();
 });
 
 // activate
-self.addEventListener("activate", evt => {
+self.addEventListener("activate", function(evt) {
   evt.waitUntil(
     caches.keys().then(keyList => {
       return Promise.all(
         keyList.map(key => {
-          if (key !== CACHE_NAME && key !== DATA_CACHE) {
-            console.log("Removing old cache data", key);
+          if (key !== STATIC_CACHE && key !== DATA_CACHE) {
+            console.log("Removing data", key);
             return caches.delete(key);
           }
         })
@@ -37,7 +38,7 @@ self.addEventListener("activate", evt => {
 });
 
 // fetch
-self.addEventListener("fetch", evt => {
+self.addEventListener("fetch", function(evt) {
   if (evt.request.url.includes("/api/")) {
     evt.respondWith(
       caches.open(DATA_CACHE).then(cache => {
@@ -61,7 +62,7 @@ self.addEventListener("fetch", evt => {
   }
 
   evt.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
+    caches.open(STATIC_CACHE).then(cache => {
       return cache.match(evt.request).then(response => {
         return response || fetch(evt.request);
       });
