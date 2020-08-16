@@ -3,7 +3,7 @@ let db;
 
 
 
-let req = window.indexedDB.open("budget", 2);
+let req = window.indexedDB.open("budget", 3);
 console.log("TestDB")
 
 req.onupgradeneeded = function (event) {
@@ -22,6 +22,7 @@ req.onsuccess = function (event){
         checkDb();
     } else {
         console.log("Connection Lost");
+        checkDb();
     }
 };
 // Error message
@@ -31,12 +32,14 @@ req.onerror = function(event) {
 
 //Saving the information 
 function saveRecord(record) {
+    console.log("record saved")
     const saveInfo = db.transaction("pending", "readwrite");
     const store = saveInfo.objectStore("pending");
     store.add(record);
 }
 
 function checkDb() {
+    console.log("DBCHECK working")
     const saveInfo = db.transaction("pending", "readwrite");
    
     //Returning  info

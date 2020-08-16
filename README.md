@@ -15,6 +15,7 @@ When brought back online:
   * Offline entries should be added to tracker.
 
 # Sources 
+https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase
 
 https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
 
@@ -29,3 +30,6 @@ https://github.com/Kennyward85/Progressive-Budget
  https://boiling-brushlands-16665.herokuapp.com/
 
  Wyzant Tutor 
+
+ ## INFO
+ For some reason this only seems to work with the update and reload option checked in the service worker as of last night it was working without It nothing has changed and it is now only saving offline data with the update and reload option checked
